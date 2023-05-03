@@ -1,6 +1,6 @@
 #![allow(clippy::int_plus_one)]
 
-use std::ops::Range;
+use std::{ops::Range, fs};
 
 use ff::{Field, FromUniformBytes};
 use group::Curve;
@@ -257,6 +257,14 @@ where
         .iter()
         .map(|poly| params.commit_lagrange(poly, Blind::default()).to_affine())
         .collect();
+
+    let mut identifiers = vec![];
+    for gate in cs.gates.iter() {
+        for poly in gate.polynomials() {
+            identifiers.push(poly.identifier());
+        }
+    }
+    fs::write("graph.txt", identifiers.join("\n").as_bytes()).unwrap();
 
     Ok(VerifyingKey::from_parts(
         domain,
